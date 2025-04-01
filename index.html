@@ -1,0 +1,498 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive home loan repayment calculator with visualizations to help you pay off your mortgage faster.">
+    <title>Home Loan Repayment Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f7;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .calculator-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        @media (min-width: 768px) {
+            .calculator-container {
+                flex-direction: row;
+            }
+        }
+        .input-section {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .results-section {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="number"], input[type="range"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="range"] {
+            padding: 0;
+        }
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: 500;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .result-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .highlight {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        .savings {
+            color: #27ae60;
+            font-weight: 700;
+        }
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+            width: 100%;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Home Loan Repayment Calculator</h1>
+    
+    <div class="calculator-container">
+        <div class="input-section">
+            <h2>Loan Details</h2>
+            
+            <div class="form-group">
+                <label for="loanAmount">Loan Amount ($)</label>
+                <input type="number" id="loanAmount" min="10000" step="10000" value="400000">
+                <div id="loanAmountError" class="error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="interestRate">Interest Rate (%)</label>
+                <input type="range" id="interestRate" min="1" max="10" step="0.1" value="6.5">
+                <span id="interestRateValue" class="value-display">6.5%</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="loanTerm">Loan Term (years)</label>
+                <input type="range" id="loanTerm" min="5" max="30" step="1" value="30">
+                <span id="loanTermValue" class="value-display">30 years</span>
+            </div>
+            
+            <h2>Faster Repayment Options</h2>
+            
+            <div class="form-group">
+                <label for="extraPayment">Extra Payment ($/month)</label>
+                <input type="range" id="extraPayment" min="0" max="2000" step="50" value="0">
+                <span id="extraPaymentValue" class="value-display">$0</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="paymentFrequency">Payment Frequency</label>
+                <select id="paymentFrequency">
+                    <option value="12">Monthly</option>
+                    <option value="26">Bi-weekly</option>
+                    <option value="52">Weekly</option>
+                </select>
+            </div>
+            
+            <button id="calculateBtn">Calculate</button>
+        </div>
+        
+        <div class="results-section">
+            <h2>Repayment Results</h2>
+            
+            <div class="result-card">
+                <h3>Standard Repayment</h3>
+                <p>Monthly Payment: <span id="standardMonthlyPayment">$0</span></p>
+                <p>Total Interest: <span id="standardTotalInterest">$0</span></p>
+                <p>Loan Payoff Date: <span id="standardPayoffDate">-</span></p>
+            </div>
+            
+            <div class="result-card">
+                <h3>Accelerated Repayment</h3>
+                <p>Payment Amount: <span id="acceleratedPayment">$0</span></p>
+                <p>Total Interest: <span id="acceleratedTotalInterest">$0</span></p>
+                <p>Loan Payoff Date: <span id="acceleratedPayoffDate">-</span></p>
+                <p>Time Saved: <span id="timeSaved" class="highlight">0 years, 0 months</span></p>
+                <p>Interest Saved: <span id="interestSaved" class="savings">$0</span></p>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="loanChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>This calculator is for informational purposes only and does not constitute financial advice.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script>
+        // DOM elements
+        const loanAmountInput = document.getElementById('loanAmount');
+        const loanAmountError = document.getElementById('loanAmountError');
+        const interestRateInput = document.getElementById('interestRate');
+        const interestRateValue = document.getElementById('interestRateValue');
+        const loanTermInput = document.getElementById('loanTerm');
+        const loanTermValue = document.getElementById('loanTermValue');
+        const extraPaymentInput = document.getElementById('extraPayment');
+        const extraPaymentValue = document.getElementById('extraPaymentValue');
+        const paymentFrequencySelect = document.getElementById('paymentFrequency');
+        const calculateBtn = document.getElementById('calculateBtn');
+        
+        // Results elements
+        const standardMonthlyPayment = document.getElementById('standardMonthlyPayment');
+        const standardTotalInterest = document.getElementById('standardTotalInterest');
+        const standardPayoffDate = document.getElementById('standardPayoffDate');
+        const acceleratedPayment = document.getElementById('acceleratedPayment');
+        const acceleratedTotalInterest = document.getElementById('acceleratedTotalInterest');
+        const acceleratedPayoffDate = document.getElementById('acceleratedPayoffDate');
+        const timeSaved = document.getElementById('timeSaved');
+        const interestSaved = document.getElementById('interestSaved');
+        
+        // Chart initialization
+        let ctx;
+        let myChart;
+        
+        // Initialize chart only when DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            ctx = document.getElementById('loanChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Year 0'],
+                    datasets: [
+                        {
+                            label: 'Standard Repayment',
+                            data: [400000],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        },
+                        {
+                            label: 'Accelerated Repayment',
+                            data: [400000],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            tension: 0.1,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Loan Balance ($)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toFixed(2);
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+            
+            // Initial calculation
+            calculateRepayments();
+        });
+        
+        // Update display values on input change
+        interestRateInput.addEventListener('input', () => {
+            interestRateValue.textContent = `${interestRateInput.value}%`;
+        });
+        
+        loanTermInput.addEventListener('input', () => {
+            loanTermValue.textContent = `${loanTermInput.value} years`;
+        });
+        
+        extraPaymentInput.addEventListener('input', () => {
+            extraPaymentValue.textContent = `$${extraPaymentInput.value}`;
+        });
+        
+        // Validate inputs
+        loanAmountInput.addEventListener('input', validateLoanAmount);
+        
+        function validateLoanAmount() {
+            if (isNaN(loanAmountInput.value) || loanAmountInput.value < 10000) {
+                loanAmountError.textContent = 'Please enter a loan amount of at least $10,000';
+                return false;
+            } else {
+                loanAmountError.textContent = '';
+                return true;
+            }
+        }
+        
+        // Calculate button event listener
+        calculateBtn.addEventListener('click', () => {
+            if (validateLoanAmount()) {
+                calculateRepayments();
+            }
+        });
+        
+        function calculateRepayments() {
+            try {
+                // Get input values
+                const loanAmount = parseFloat(loanAmountInput.value);
+                const interestRate = parseFloat(interestRateInput.value) / 100;
+                const loanTermYears = parseInt(loanTermInput.value);
+                const extraPayment = parseFloat(extraPaymentInput.value);
+                const paymentFrequency = parseInt(paymentFrequencySelect.value);
+                
+                // Calculate monthly interest rate
+                const monthlyRate = interestRate / 12;
+                
+                // Calculate number of payments
+                const totalPayments = loanTermYears * 12;
+                
+                // Calculate standard monthly payment (P&I)
+                const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+                
+                // Calculate standard repayment schedule
+                const standardSchedule = calculateAmortizationSchedule(loanAmount, monthlyRate, totalPayments, 0, 12);
+                
+                // Calculate accelerated repayment schedule
+                const periodicPayment = monthlyPayment * 12 / paymentFrequency;
+                const periodicRate = interestRate / paymentFrequency;
+                const periodicExtraPayment = extraPayment * 12 / paymentFrequency;
+                const acceleratedSchedule = calculateAmortizationSchedule(loanAmount, periodicRate, totalPayments, periodicExtraPayment, paymentFrequency);
+                
+                // Update results
+                standardMonthlyPayment.textContent = `$${formatNumber(monthlyPayment)}`;
+                standardTotalInterest.textContent = `$${formatNumber(standardSchedule.totalInterest)}`;
+                
+                const standardPayoffYears = Math.floor(standardSchedule.numberOfPayments / 12);
+                const standardPayoffMonths = standardSchedule.numberOfPayments % 12;
+                standardPayoffDate.textContent = `${getPayoffDate(standardPayoffYears, standardPayoffMonths)}`;
+                
+                acceleratedPayment.textContent = `$${formatNumber(periodicPayment + periodicExtraPayment)} ${getFrequencyText(paymentFrequency)}`;
+                acceleratedTotalInterest.textContent = `$${formatNumber(acceleratedSchedule.totalInterest)}`;
+                
+                const acceleratedPayoffYears = Math.floor(acceleratedSchedule.numberOfPayments / paymentFrequency * 12);
+                const acceleratedPayoffMonths = Math.round((acceleratedSchedule.numberOfPayments / paymentFrequency * 12) % 12);
+                acceleratedPayoffDate.textContent = `${getPayoffDate(acceleratedPayoffYears, acceleratedPayoffMonths)}`;
+                
+                // Calculate time saved
+                const standardMonths = standardSchedule.numberOfPayments;
+                const acceleratedMonths = acceleratedSchedule.numberOfPayments / paymentFrequency * 12;
+                const monthsSaved = standardMonths - acceleratedMonths;
+                
+                const yearsSaved = Math.floor(monthsSaved / 12);
+                const remainingMonthsSaved = Math.round(monthsSaved % 12);
+                timeSaved.textContent = `${yearsSaved} years, ${remainingMonthsSaved} months`;
+                
+                // Calculate interest saved
+                const interestSavingsAmount = standardSchedule.totalInterest - acceleratedSchedule.totalInterest;
+                interestSaved.textContent = `$${formatNumber(interestSavingsAmount)}`;
+                
+                // Update chart
+                updateChart(standardSchedule, acceleratedSchedule, paymentFrequency);
+            } catch (error) {
+                console.error("Calculation error:", error);
+            }
+        }
+        
+        function formatNumber(num) {
+            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        function calculateAmortizationSchedule(principal, periodicRate, totalPayments, extraPayment, frequency) {
+            let balance = principal;
+            let payment = principal * (periodicRate * Math.pow(1 + periodicRate, totalPayments)) / (Math.pow(1 + periodicRate, totalPayments) - 1);
+            let totalInterest = 0;
+            let payments = 0;
+            let balanceData = [];
+            
+            balanceData.push(balance);
+            
+            while (balance > 0 && payments <= totalPayments * 3) {
+                payments++;
+                
+                // Calculate interest for this period
+                let interestPayment = balance * periodicRate;
+                totalInterest += interestPayment;
+                
+                // Calculate principal for this period
+                let principalPayment = payment - interestPayment;
+                
+                // Add extra payment
+                principalPayment += extraPayment;
+                
+                // Update balance
+                balance -= principalPayment;
+                
+                // Ensure we don't go below zero
+                if (balance < 0) {
+                    totalInterest += balance * -1;
+                    balance = 0;
+                }
+                
+                // Store balance for chart
+                if (payments % Math.round(frequency / 12) === 0 || balance === 0) {
+                    balanceData.push(balance);
+                }
+                
+                // Break if balance is zero
+                if (balance === 0) break;
+            }
+            
+            return {
+                numberOfPayments: payments,
+                totalInterest: totalInterest,
+                balanceData: balanceData
+            };
+        }
+        
+        function getPayoffDate(years, months) {
+            try {
+                const today = new Date();
+                let payoffDate = new Date(today);
+                payoffDate.setFullYear(payoffDate.getFullYear() + years);
+                payoffDate.setMonth(payoffDate.getMonth() + months);
+                
+                return payoffDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+            } catch (error) {
+                console.error("Date calculation error:", error);
+                return "Error calculating date";
+            }
+        }
+        
+        function getFrequencyText(frequency) {
+            switch(frequency) {
+                case 12: return '(monthly)';
+                case 26: return '(bi-weekly)';
+                case 52: return '(weekly)';
+                default: return '';
+            }
+        }
+        
+        function updateChart(standardSchedule, acceleratedSchedule, frequency) {
+            try {
+                // Create years array for x-axis labels
+                const standardYears = Math.ceil(standardSchedule.numberOfPayments / 12);
+                const acceleratedYears = Math.ceil(acceleratedSchedule.numberOfPayments / frequency * 12);
+                const maxYears = Math.max(standardYears, acceleratedYears);
+                
+                const labels = Array.from({ length: maxYears + 1 }, (_, i) => `Year ${i}`);
+                
+                // Create data arrays of same length
+                let standardData = [standardSchedule.balanceData[0]];
+                let acceleratedData = [acceleratedSchedule.balanceData[0]];
+                
+                // Map payment data to yearly data points
+                for (let year = 1; year <= maxYears; year++) {
+                    const standardMonth = year * 12;
+                    const standardIndex = Math.min(Math.round(standardMonth / (12/12)), standardSchedule.balanceData.length - 1);
+                    standardData.push(standardIndex >= 0 ? standardSchedule.balanceData[standardIndex] : 0);
+                    
+                    const acceleratedMonth = year * 12;
+                    const acceleratedIndex = Math.min(Math.round(acceleratedMonth / (12/frequency)), acceleratedSchedule.balanceData.length - 1);
+                    acceleratedData.push(acceleratedIndex >= 0 ? acceleratedSchedule.balanceData[acceleratedIndex] : 0);
+                }
+                
+                // Update chart data
+                myChart.data.labels = labels;
+                myChart.data.datasets[0].data = standardData;
+                myChart.data.datasets[1].data = acceleratedData;
+                myChart.update();
+            } catch (error) {
+                console.error("Chart update error:", error);
+            }
+        }
+    </script>
+</body>
+</html>
