@@ -1,498 +1,771 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive home loan repayment calculator with visualizations to help you pay off your mortgage faster.">
     <title>Home Loan Repayment Calculator</title>
     <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --background: #f9fafb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --border: #e5e7eb;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1000px;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            color: var(--text);
+            background-color: var(--background);
+            margin: 0;
             padding: 20px;
-            background-color: #f5f5f7;
         }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: var(--card);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
         h1 {
-            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary);
             text-align: center;
-            margin-bottom: 30px;
         }
-        .calculator-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
         }
-        @media (min-width: 768px) {
-            .calculator-container {
-                flex-direction: row;
+        
+        .form-group {
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 640px) {
+            .form-group {
+                grid-template-columns: 1fr 1fr;
+                align-items: center;
+            }
+            
+            .form-group label {
+                margin-bottom: 0;
             }
         }
-        .input-section {
-            flex: 1;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .results-section {
-            flex: 1;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
+        
         label {
-            display: block;
-            margin-bottom: 5px;
             font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
         }
-        input[type="number"], input[type="range"], select {
+        
+        input, select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
             border-radius: 4px;
+            font-size: 1rem;
             box-sizing: border-box;
         }
-        input[type="range"] {
-            padding: 0;
-        }
-        .value-display {
-            display: inline-block;
-            margin-left: 10px;
-            font-weight: 500;
-        }
+        
         button {
-            background-color: #3498db;
+            background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
             border-radius: 4px;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 100%;
-            margin-top: 10px;
+            transition: background-color 0.2s;
         }
+        
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-dark);
         }
-        .result-card {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
-        .result-card h3 {
-            margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+        
+        .results {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
-        .highlight {
-            color: #e74c3c;
-            font-weight: 700;
+        
+        .results-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
         }
-        .savings {
-            color: #27ae60;
-            font-weight: 700;
+        
+        .results-label {
+            font-weight: 600;
         }
+        
         .chart-container {
-            margin-top: 20px;
+            margin-top: 1.5rem;
             height: 300px;
+        }
+        
+        .lump-sums-container {
+            margin-top: 1rem;
+        }
+        
+        .lump-sum-entry {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .remove-btn {
+            background-color: #ef4444;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-btn:hover {
+            background-color: #dc2626;
+        }
+        
+        .payment-plan {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .payment-plan table {
             width: 100%;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 10px;
-            box-sizing: border-box;
+            border-collapse: collapse;
         }
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 14px;
-            color: #7f8c8d;
+        
+        .payment-plan th, .payment-plan td {
+            padding: 0.5rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
         }
-        .error {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
+        
+        .payment-plan th:first-child, .payment-plan td:first-child {
+            text-align: left;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <h1>Home Loan Repayment Calculator</h1>
-    
-    <div class="calculator-container">
-        <div class="input-section">
-            <h2>Loan Details</h2>
+    <div class="container">
+        <div class="card">
+            <h1>Home Loan Repayment Calculator</h1>
             
-            <div class="form-group">
-                <label for="loanAmount">Loan Amount ($)</label>
-                <input type="number" id="loanAmount" min="10000" step="10000" value="400000">
-                <div id="loanAmountError" class="error"></div>
+            <div class="tabs">
+                <div class="tab active" data-tab="calculator">Calculator</div>
+                <div class="tab" data-tab="payment-schedule">Payment Schedule</div>
             </div>
             
-            <div class="form-group">
-                <label for="interestRate">Interest Rate (%)</label>
-                <input type="range" id="interestRate" min="1" max="10" step="0.1" value="6.5">
-                <span id="interestRateValue" class="value-display">6.5%</span>
+            <div class="tab-content active" id="calculator-tab">
+                <div class="form-group">
+                    <label for="loan-amount">Loan Amount ($)</label>
+                    <input type="text" id="loan-amount" value="500000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interest-rate">Interest Rate (%)</label>
+                    <input type="text" id="interest-rate" value="5.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="loan-term">Loan Term (years)</label>
+                    <input type="text" id="loan-term" value="30">
+                </div>
+                
+                <div class="form-group">
+                    <label for="payment-frequency">Payment Frequency</label>
+                    <select id="payment-frequency">
+                        <option value="monthly">Monthly</option>
+                        <option value="fortnightly">Fortnightly</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="extra-payment">Regular Extra Payment ($)</label>
+                    <input type="text" id="extra-payment" value="0">
+                </div>
+                
+                <h2>Lump Sum Payments</h2>
+                <div id="lump-sums-container" class="lump-sums-container"></div>
+                
+                <button id="add-lump-sum">Add Lump Sum Payment</button>
+                
+                <div class="button-group">
+                    <button id="calculate-btn">Calculate</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                
+                <div class="results" id="results-container">
+                    <h2>Loan Summary</h2>
+                    
+                    <div class="results-row">
+                        <span class="results-label">Regular Payment:</span>
+                        <span id="regular-payment">$0</span>
+                    </div>
+                    
+                    <div class="results-row">
+                        <span class="results-label">Total Interest:</span>
+                        <span id="total-interest">$0</span>
+                    </div>
+                    
+                    <div class="results-row">
+                        <span class="results-label">Loan Payoff Date:</span>
+                        <span id="payoff-date">-</span>
+                    </div>
+                    
+                    <div class="results-row">
+                        <span class="results-label">Time Saved:</span>
+                        <span id="time-saved">-</span>
+                    </div>
+                    
+                    <div class="results-row">
+                        <span class="results-label">Interest Saved:</span>
+                        <span id="interest-saved">$0</span>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="comparison-chart"></canvas>
+                    </div>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="loanTerm">Loan Term (years)</label>
-                <input type="range" id="loanTerm" min="5" max="30" step="1" value="30">
-                <span id="loanTermValue" class="value-display">30 years</span>
-            </div>
-            
-            <h2>Faster Repayment Options</h2>
-            
-            <div class="form-group">
-                <label for="extraPayment">Extra Payment ($/month)</label>
-                <input type="range" id="extraPayment" min="0" max="2000" step="50" value="0">
-                <span id="extraPaymentValue" class="value-display">$0</span>
-            </div>
-            
-            <div class="form-group">
-                <label for="paymentFrequency">Payment Frequency</label>
-                <select id="paymentFrequency">
-                    <option value="12">Monthly</option>
-                    <option value="26">Bi-weekly</option>
-                    <option value="52">Weekly</option>
-                </select>
-            </div>
-            
-            <button id="calculateBtn">Calculate</button>
-        </div>
-        
-        <div class="results-section">
-            <h2>Repayment Results</h2>
-            
-            <div class="result-card">
-                <h3>Standard Repayment</h3>
-                <p>Monthly Payment: <span id="standardMonthlyPayment">$0</span></p>
-                <p>Total Interest: <span id="standardTotalInterest">$0</span></p>
-                <p>Loan Payoff Date: <span id="standardPayoffDate">-</span></p>
-            </div>
-            
-            <div class="result-card">
-                <h3>Accelerated Repayment</h3>
-                <p>Payment Amount: <span id="acceleratedPayment">$0</span></p>
-                <p>Total Interest: <span id="acceleratedTotalInterest">$0</span></p>
-                <p>Loan Payoff Date: <span id="acceleratedPayoffDate">-</span></p>
-                <p>Time Saved: <span id="timeSaved" class="highlight">0 years, 0 months</span></p>
-                <p>Interest Saved: <span id="interestSaved" class="savings">$0</span></p>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="loanChart"></canvas>
+            <div class="tab-content" id="payment-schedule-tab">
+                <h2>Payment Schedule</h2>
+                <div class="payment-plan" id="payment-schedule">
+                    <p>Calculate loan repayments to see the payment schedule.</p>
+                </div>
             </div>
         </div>
     </div>
-    
-    <footer>
-        <p>This calculator is for informational purposes only and does not constitute financial advice.</p>
-    </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
     <script>
-        // DOM elements
-        const loanAmountInput = document.getElementById('loanAmount');
-        const loanAmountError = document.getElementById('loanAmountError');
-        const interestRateInput = document.getElementById('interestRate');
-        const interestRateValue = document.getElementById('interestRateValue');
-        const loanTermInput = document.getElementById('loanTerm');
-        const loanTermValue = document.getElementById('loanTermValue');
-        const extraPaymentInput = document.getElementById('extraPayment');
-        const extraPaymentValue = document.getElementById('extraPaymentValue');
-        const paymentFrequencySelect = document.getElementById('paymentFrequency');
-        const calculateBtn = document.getElementById('calculateBtn');
-        
-        // Results elements
-        const standardMonthlyPayment = document.getElementById('standardMonthlyPayment');
-        const standardTotalInterest = document.getElementById('standardTotalInterest');
-        const standardPayoffDate = document.getElementById('standardPayoffDate');
-        const acceleratedPayment = document.getElementById('acceleratedPayment');
-        const acceleratedTotalInterest = document.getElementById('acceleratedTotalInterest');
-        const acceleratedPayoffDate = document.getElementById('acceleratedPayoffDate');
-        const timeSaved = document.getElementById('timeSaved');
-        const interestSaved = document.getElementById('interestSaved');
-        
-        // Chart initialization
-        let ctx;
-        let myChart;
-        
-        // Initialize chart only when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
-            ctx = document.getElementById('loanChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Year 0'],
-                    datasets: [
-                        {
-                            label: 'Standard Repayment',
-                            data: [400000],
-                            borderColor: '#3498db',
-                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                            tension: 0.1,
-                            fill: true
-                        },
-                        {
-                            label: 'Accelerated Repayment',
-                            data: [400000],
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            tension: 0.1,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Loan Balance ($)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.dataset.label + ': $' + context.raw.toFixed(2);
-                                }
-                            }
-                        },
-                        legend: {
-                            position: 'top'
-                        }
-                    }
+            // DOM Elements
+            const loanAmountInput = document.getElementById('loan-amount');
+            const interestRateInput = document.getElementById('interest-rate');
+            const loanTermInput = document.getElementById('loan-term');
+            const paymentFrequencySelect = document.getElementById('payment-frequency');
+            const extraPaymentInput = document.getElementById('extra-payment');
+            const lumpSumsContainer = document.getElementById('lump-sums-container');
+            const addLumpSumBtn = document.getElementById('add-lump-sum');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const resultsContainer = document.getElementById('results-container');
+            const paymentScheduleContainer = document.getElementById('payment-schedule');
+            
+            // Result output elements
+            const regularPaymentOutput = document.getElementById('regular-payment');
+            const totalInterestOutput = document.getElementById('total-interest');
+            const payoffDateOutput = document.getElementById('payoff-date');
+            const timeSavedOutput = document.getElementById('time-saved');
+            const interestSavedOutput = document.getElementById('interest-saved');
+            
+            // Chart
+            let comparisonChart = null;
+            
+            // Tab navigation
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Allow only numbers and decimals in numeric fields
+            const numericInputs = [loanAmountInput, interestRateInput, loanTermInput, extraPaymentInput];
+            numericInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9.]/g, '');
+                });
+            });
+            
+            // Add lump sum payment
+            let lumpSumCount = 0;
+            addLumpSumBtn.addEventListener('click', addLumpSumField);
+            
+            function addLumpSumField() {
+                const lumpSumId = `lump-sum-${lumpSumCount}`;
+                const lumpSumMonthId = `lump-sum-month-${lumpSumCount}`;
+                
+                const lumpSumEntry = document.createElement('div');
+                lumpSumEntry.className = 'lump-sum-entry';
+                lumpSumEntry.innerHTML = `
+                    <input type="text" id="${lumpSumId}" placeholder="Amount ($)" class="lump-sum-amount">
+                    <input type="text" id="${lumpSumMonthId}" placeholder="After month number" class="lump-sum-month">
+                    <button class="remove-btn" data-id="${lumpSumCount}">✕</button>
+                `;
+                
+                lumpSumsContainer.appendChild(lumpSumEntry);
+                
+                // Add event listener to only allow numbers in the new inputs
+                const newAmountInput = document.getElementById(lumpSumId);
+                const newMonthInput = document.getElementById(lumpSumMonthId);
+                
+                [newAmountInput, newMonthInput].forEach(input => {
+                    input.addEventListener('input', function() {
+                        this.value = this.value.replace(/[^0-9.]/g, '');
+                    });
+                });
+                
+                // Add event listener to remove button
+                const removeBtn = lumpSumEntry.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', function() {
+                    lumpSumEntry.remove();
+                });
+                
+                lumpSumCount++;
+            }
+            
+            // Calculate loan
+            calculateBtn.addEventListener('click', calculateLoan);
+            
+            // Reset form
+            resetBtn.addEventListener('click', function() {
+                loanAmountInput.value = '500000';
+                interestRateInput.value = '5.5';
+                loanTermInput.value = '30';
+                paymentFrequencySelect.value = 'monthly';
+                extraPaymentInput.value = '0';
+                lumpSumsContainer.innerHTML = '';
+                
+                // Reset results
+                regularPaymentOutput.textContent = '$0';
+                totalInterestOutput.textContent = '$0';
+                payoffDateOutput.textContent = '-';
+                timeSavedOutput.textContent = '-';
+                interestSavedOutput.textContent = '$0';
+                
+                // Clear payment schedule
+                paymentScheduleContainer.innerHTML = '<p>Calculate loan repayments to see the payment schedule.</p>';
+                
+                // Clear chart
+                if (comparisonChart) {
+                    comparisonChart.destroy();
+                    comparisonChart = null;
                 }
             });
             
-            // Initial calculation
-            calculateRepayments();
-        });
-        
-        // Update display values on input change
-        interestRateInput.addEventListener('input', () => {
-            interestRateValue.textContent = `${interestRateInput.value}%`;
-        });
-        
-        loanTermInput.addEventListener('input', () => {
-            loanTermValue.textContent = `${loanTermInput.value} years`;
-        });
-        
-        extraPaymentInput.addEventListener('input', () => {
-            extraPaymentValue.textContent = `$${extraPaymentInput.value}`;
-        });
-        
-        // Validate inputs
-        loanAmountInput.addEventListener('input', validateLoanAmount);
-        
-        function validateLoanAmount() {
-            if (isNaN(loanAmountInput.value) || loanAmountInput.value < 10000) {
-                loanAmountError.textContent = 'Please enter a loan amount of at least $10,000';
-                return false;
-            } else {
-                loanAmountError.textContent = '';
-                return true;
-            }
-        }
-        
-        // Calculate button event listener
-        calculateBtn.addEventListener('click', () => {
-            if (validateLoanAmount()) {
-                calculateRepayments();
-            }
-        });
-        
-        function calculateRepayments() {
-            try {
+            function calculateLoan() {
                 // Get input values
-                const loanAmount = parseFloat(loanAmountInput.value);
-                const interestRate = parseFloat(interestRateInput.value) / 100;
-                const loanTermYears = parseInt(loanTermInput.value);
-                const extraPayment = parseFloat(extraPaymentInput.value);
-                const paymentFrequency = parseInt(paymentFrequencySelect.value);
+                const loanAmount = parseFloat(loanAmountInput.value.replace(/,/g, '')) || 0;
+                const interestRate = parseFloat(interestRateInput.value) || 0;
+                const loanTerm = parseFloat(loanTermInput.value) || 0;
+                const paymentFrequency = paymentFrequencySelect.value;
+                const extraPayment = parseFloat(extraPaymentInput.value.replace(/,/g, '')) || 0;
                 
-                // Calculate monthly interest rate
-                const monthlyRate = interestRate / 12;
+                // Validate inputs
+                if (loanAmount <= 0 || interestRate <= 0 || loanTerm <= 0) {
+                    alert('Please enter valid loan details.');
+                    return;
+                }
                 
-                // Calculate number of payments
-                const totalPayments = loanTermYears * 12;
+                // Calculate payment frequency
+                let paymentsPerYear;
+                switch (paymentFrequency) {
+                    case 'weekly':
+                        paymentsPerYear = 52;
+                        break;
+                    case 'fortnightly':
+                        paymentsPerYear = 26;
+                        break;
+                    case 'monthly':
+                    default:
+                        paymentsPerYear = 12;
+                        break;
+                }
                 
-                // Calculate standard monthly payment (P&I)
-                const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) / (Math.pow(1 + monthlyRate, totalPayments) - 1);
+                // Calculate total number of payments
+                const totalPayments = loanTerm * paymentsPerYear;
                 
-                // Calculate standard repayment schedule
-                const standardSchedule = calculateAmortizationSchedule(loanAmount, monthlyRate, totalPayments, 0, 12);
+                // Calculate interest rate per period
+                const interestRatePerPeriod = (interestRate / 100) / paymentsPerYear;
                 
-                // Calculate accelerated repayment schedule
-                const periodicPayment = monthlyPayment * 12 / paymentFrequency;
-                const periodicRate = interestRate / paymentFrequency;
-                const periodicExtraPayment = extraPayment * 12 / paymentFrequency;
-                const acceleratedSchedule = calculateAmortizationSchedule(loanAmount, periodicRate, totalPayments, periodicExtraPayment, paymentFrequency);
+                // Calculate regular payment amount using the mortgage formula
+                const regularPayment = loanAmount * (interestRatePerPeriod * Math.pow(1 + interestRatePerPeriod, totalPayments)) / (Math.pow(1 + interestRatePerPeriod, totalPayments) - 1);
                 
-                // Update results
-                standardMonthlyPayment.textContent = `$${formatNumber(monthlyPayment)}`;
-                standardTotalInterest.textContent = `$${formatNumber(standardSchedule.totalInterest)}`;
+                // Get lump sum payments
+                const lumpSumPayments = [];
+                const lumpSumElements = document.querySelectorAll('.lump-sum-entry');
                 
-                const standardPayoffYears = Math.floor(standardSchedule.numberOfPayments / 12);
-                const standardPayoffMonths = standardSchedule.numberOfPayments % 12;
-                standardPayoffDate.textContent = `${getPayoffDate(standardPayoffYears, standardPayoffMonths)}`;
+                lumpSumElements.forEach(element => {
+                    const amountInput = element.querySelector('.lump-sum-amount');
+                    const monthInput = element.querySelector('.lump-sum-month');
+                    
+                    const amount = parseFloat(amountInput.value.replace(/,/g, '')) || 0;
+                    const month = parseInt(monthInput.value) || 0;
+                    
+                    if (amount > 0 && month > 0) {
+                        lumpSumPayments.push({ amount, month });
+                    }
+                });
                 
-                acceleratedPayment.textContent = `$${formatNumber(periodicPayment + periodicExtraPayment)} ${getFrequencyText(paymentFrequency)}`;
-                acceleratedTotalInterest.textContent = `$${formatNumber(acceleratedSchedule.totalInterest)}`;
+                // Sort lump sum payments by month
+                lumpSumPayments.sort((a, b) => a.month - b.month);
                 
-                const acceleratedPayoffYears = Math.floor(acceleratedSchedule.numberOfPayments / paymentFrequency * 12);
-                const acceleratedPayoffMonths = Math.round((acceleratedSchedule.numberOfPayments / paymentFrequency * 12) % 12);
-                acceleratedPayoffDate.textContent = `${getPayoffDate(acceleratedPayoffYears, acceleratedPayoffMonths)}`;
+                // Calculate standard amortization schedule
+                const standardSchedule = calculateAmortizationSchedule(
+                    loanAmount, 
+                    interestRatePerPeriod, 
+                    totalPayments, 
+                    regularPayment, 
+                    0, 
+                    []
+                );
+                
+                // Calculate accelerated amortization schedule
+                const acceleratedSchedule = calculateAmortizationSchedule(
+                    loanAmount, 
+                    interestRatePerPeriod, 
+                    totalPayments, 
+                    regularPayment, 
+                    extraPayment, 
+                    lumpSumPayments
+                );
+                
+                // Update UI with results
+                regularPaymentOutput.textContent = formatCurrency(regularPayment);
+                totalInterestOutput.textContent = formatCurrency(standardSchedule.totalInterest);
+                
+                // Calculate payoff date
+                const currentDate = new Date();
+                const payoffDate = new Date(currentDate);
+                
+                // Add months based on the actual number of payments in the accelerated schedule
+                switch (paymentFrequency) {
+                    case 'weekly':
+                        payoffDate.setDate(payoffDate.getDate() + (7 * acceleratedSchedule.paymentsMade));
+                        break;
+                    case 'fortnightly':
+                        payoffDate.setDate(payoffDate.getDate() + (14 * acceleratedSchedule.paymentsMade));
+                        break;
+                    case 'monthly':
+                    default:
+                        payoffDate.setMonth(payoffDate.getMonth() + acceleratedSchedule.paymentsMade);
+                        break;
+                }
+                
+                payoffDateOutput.textContent = payoffDate.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
                 
                 // Calculate time saved
-                const standardMonths = standardSchedule.numberOfPayments;
-                const acceleratedMonths = acceleratedSchedule.numberOfPayments / paymentFrequency * 12;
-                const monthsSaved = standardMonths - acceleratedMonths;
+                const standardPayments = standardSchedule.paymentsMade;
+                const acceleratedPayments = acceleratedSchedule.paymentsMade;
+                const paymentsSaved = standardPayments - acceleratedPayments;
                 
-                const yearsSaved = Math.floor(monthsSaved / 12);
-                const remainingMonthsSaved = Math.round(monthsSaved % 12);
-                timeSaved.textContent = `${yearsSaved} years, ${remainingMonthsSaved} months`;
+                let timeSavedText = '';
+                switch (paymentFrequency) {
+                    case 'weekly':
+                        timeSavedText = formatTimeSaved(paymentsSaved, 'week');
+                        break;
+                    case 'fortnightly':
+                        timeSavedText = formatTimeSaved(paymentsSaved, 'fortnight');
+                        break;
+                    case 'monthly':
+                    default:
+                        timeSavedText = formatTimeSaved(paymentsSaved, 'month');
+                        break;
+                }
+                
+                timeSavedOutput.textContent = timeSavedText;
                 
                 // Calculate interest saved
-                const interestSavingsAmount = standardSchedule.totalInterest - acceleratedSchedule.totalInterest;
-                interestSaved.textContent = `$${formatNumber(interestSavingsAmount)}`;
+                const interestSaved = standardSchedule.totalInterest - acceleratedSchedule.totalInterest;
+                interestSavedOutput.textContent = formatCurrency(interestSaved);
                 
-                // Update chart
-                updateChart(standardSchedule, acceleratedSchedule, paymentFrequency);
-            } catch (error) {
-                console.error("Calculation error:", error);
-            }
-        }
-        
-        function formatNumber(num) {
-            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-        
-        function calculateAmortizationSchedule(principal, periodicRate, totalPayments, extraPayment, frequency) {
-            let balance = principal;
-            let payment = principal * (periodicRate * Math.pow(1 + periodicRate, totalPayments)) / (Math.pow(1 + periodicRate, totalPayments) - 1);
-            let totalInterest = 0;
-            let payments = 0;
-            let balanceData = [];
-            
-            balanceData.push(balance);
-            
-            while (balance > 0 && payments <= totalPayments * 3) {
-                payments++;
+                // Generate payment schedule
+                generatePaymentSchedule(acceleratedSchedule.schedule, paymentFrequency);
                 
-                // Calculate interest for this period
-                let interestPayment = balance * periodicRate;
-                totalInterest += interestPayment;
-                
-                // Calculate principal for this period
-                let principalPayment = payment - interestPayment;
-                
-                // Add extra payment
-                principalPayment += extraPayment;
-                
-                // Update balance
-                balance -= principalPayment;
-                
-                // Ensure we don't go below zero
-                if (balance < 0) {
-                    totalInterest += balance * -1;
-                    balance = 0;
-                }
-                
-                // Store balance for chart
-                if (payments % Math.round(frequency / 12) === 0 || balance === 0) {
-                    balanceData.push(balance);
-                }
-                
-                // Break if balance is zero
-                if (balance === 0) break;
+                // Update comparison chart
+                updateComparisonChart(standardSchedule.schedule, acceleratedSchedule.schedule);
             }
             
-            return {
-                numberOfPayments: payments,
-                totalInterest: totalInterest,
-                balanceData: balanceData
-            };
-        }
-        
-        function getPayoffDate(years, months) {
-            try {
-                const today = new Date();
-                let payoffDate = new Date(today);
-                payoffDate.setFullYear(payoffDate.getFullYear() + years);
-                payoffDate.setMonth(payoffDate.getMonth() + months);
+            function calculateAmortizationSchedule(loanAmount, interestRatePerPeriod, totalPayments, regularPayment, extraPayment, lumpSumPayments) {
+                let remainingBalance = loanAmount;
+                let totalInterest = 0;
+                let paymentsMade = 0;
+                const schedule = [];
                 
-                return payoffDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-            } catch (error) {
-                console.error("Date calculation error:", error);
-                return "Error calculating date";
-            }
-        }
-        
-        function getFrequencyText(frequency) {
-            switch(frequency) {
-                case 12: return '(monthly)';
-                case 26: return '(bi-weekly)';
-                case 52: return '(weekly)';
-                default: return '';
-            }
-        }
-        
-        function updateChart(standardSchedule, acceleratedSchedule, frequency) {
-            try {
-                // Create years array for x-axis labels
-                const standardYears = Math.ceil(standardSchedule.numberOfPayments / 12);
-                const acceleratedYears = Math.ceil(acceleratedSchedule.numberOfPayments / frequency * 12);
-                const maxYears = Math.max(standardYears, acceleratedYears);
+                // Copy lump sum payments to avoid modifying the original array
+                const pendingLumpSums = [...lumpSumPayments];
                 
-                const labels = Array.from({ length: maxYears + 1 }, (_, i) => `Year ${i}`);
-                
-                // Create data arrays of same length
-                let standardData = [standardSchedule.balanceData[0]];
-                let acceleratedData = [acceleratedSchedule.balanceData[0]];
-                
-                // Map payment data to yearly data points
-                for (let year = 1; year <= maxYears; year++) {
-                    const standardMonth = year * 12;
-                    const standardIndex = Math.min(Math.round(standardMonth / (12/12)), standardSchedule.balanceData.length - 1);
-                    standardData.push(standardIndex >= 0 ? standardSchedule.balanceData[standardIndex] : 0);
+                for (let paymentNumber = 1; paymentNumber <= totalPayments; paymentNumber++) {
+                    // Check if there are any lump sum payments for this period
+                    let lumpSumAmount = 0;
+                    while (pendingLumpSums.length > 0 && pendingLumpSums[0].month === paymentNumber) {
+                        lumpSumAmount += pendingLumpSums.shift().amount;
+                    }
                     
-                    const acceleratedMonth = year * 12;
-                    const acceleratedIndex = Math.min(Math.round(acceleratedMonth / (12/frequency)), acceleratedSchedule.balanceData.length - 1);
-                    acceleratedData.push(acceleratedIndex >= 0 ? acceleratedSchedule.balanceData[acceleratedIndex] : 0);
+                    // Calculate interest for this period
+                    const interestPayment = remainingBalance * interestRatePerPeriod;
+                    
+                    // Calculate principal for this period (regular payment + extra payment)
+                    let principalPayment = regularPayment - interestPayment;
+                    
+                    // Add extra payment
+                    principalPayment += extraPayment;
+                    
+                    // Add lump sum payment
+                    principalPayment += lumpSumAmount;
+                    
+                    // Make sure we don't pay more than the remaining balance
+                    if (principalPayment > remainingBalance) {
+                        principalPayment = remainingBalance;
+                    }
+                    
+                    // Update remaining balance
+                    remainingBalance -= principalPayment;
+                    
+                    // Update total interest
+                    totalInterest += interestPayment;
+                    
+                    // Add payment to schedule
+                    schedule.push({
+                        paymentNumber,
+                        regularPayment: regularPayment,
+                        extraPayment: extraPayment,
+                        lumpSumPayment: lumpSumAmount,
+                        interestPayment: interestPayment,
+                        principalPayment: principalPayment,
+                        remainingBalance: remainingBalance
+                    });
+                    
+                    // Increment payments made
+                    paymentsMade++;
+                    
+                    // If loan is paid off, break out of loop
+                    if (remainingBalance <= 0) {
+                        break;
+                    }
                 }
                 
-                // Update chart data
-                myChart.data.labels = labels;
-                myChart.data.datasets[0].data = standardData;
-                myChart.data.datasets[1].data = acceleratedData;
-                myChart.update();
-            } catch (error) {
-                console.error("Chart update error:", error);
+                return {
+                    schedule,
+                    totalInterest,
+                    paymentsMade
+                };
             }
-        }
+            
+            function generatePaymentSchedule(schedule, paymentFrequency) {
+                // Clear previous schedule
+                paymentScheduleContainer.innerHTML = '';
+                
+                // Create table
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Payment #</th>
+                            <th>Regular</th>
+                            <th>Extra</th>
+                            <th>Lump Sum</th>
+                            <th>Interest</th>
+                            <th>Principal</th>
+                            <th>Remaining</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `;
+                
+                // Get table body
+                const tableBody = table.querySelector('tbody');
+                
+                // Add rows for each payment
+                schedule.forEach(payment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${payment.paymentNumber}</td>
+                        <td>${formatCurrency(payment.regularPayment)}</td>
+                        <td>${formatCurrency(payment.extraPayment)}</td>
+                        <td>${formatCurrency(payment.lumpSumPayment)}</td>
+                        <td>${formatCurrency(payment.interestPayment)}</td>
+                        <td>${formatCurrency(payment.principalPayment)}</td>
+                        <td>${formatCurrency(payment.remainingBalance)}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                
+                // Add table to container
+                paymentScheduleContainer.appendChild(table);
+            }
+            
+            function updateComparisonChart(standardSchedule, acceleratedSchedule) {
+                // Get canvas element
+                const chartCanvas = document.getElementById('comparison-chart');
+                
+                // Destroy previous chart if it exists
+                if (comparisonChart) {
+                    comparisonChart.destroy();
+                }
+                
+                // Prepare data for chart
+                const standardBalances = standardSchedule.map(payment => payment.remainingBalance);
+                const acceleratedBalances = acceleratedSchedule.map(payment => payment.remainingBalance);
+                
+                // Make sure both arrays have the same length for comparison
+                const maxLength = Math.max(standardBalances.length, acceleratedBalances.length);
+                
+                for (let i = standardBalances.length; i < maxLength; i++) {
+                    standardBalances.push(0);
+                }
+                
+                for (let i = acceleratedBalances.length; i < maxLength; i++) {
+                    acceleratedBalances.push(0);
+                }
+                
+                // Create labels (payment numbers)
+                const labels = Array.from({ length: maxLength }, (_, i) => i + 1);
+                
+                // Create chart
+                comparisonChart = new Chart(chartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Standard Repayment',
+                                data: standardBalances,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                fill: true
+                            },
+                            {
+                                label: 'Accelerated Repayment',
+                                data: acceleratedBalances,
+                                borderColor: '#22c55e',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Loan Balance Comparison'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString('en-US', { 
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Helper function to format currency
+            function formatCurrency(amount) {
+                return '$' + amount.toLocaleString('en-US', { 
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+            
+            // Helper function to format time saved
+            function formatTimeSaved(units, unitName) {
+                if (units <= 0) {
+                    return 'No time saved';
+                }
+                
+                const years = Math.floor(units / (unitName === 'month' ? 12 : unitName === 'fortnight' ? 26 : 52));
+                const remainingUnits = units % (unitName === 'month' ? 12 : unitName === 'fortnight' ? 26 : 52);
+                
+                let timeSavedText = '';
+                
+                if (years > 0) {
+                    timeSavedText += `${years} year${years !== 1 ? 's' : ''}`;
+                    
+                    if (remainingUnits > 0) {
+                        timeSavedText += ` and ${remainingUnits} ${unitName}${remainingUnits !== 1 ? 's' : ''}`;
+                    }
+                } else {
+                    timeSavedText = `${units} ${unitName}${units !== 1 ? 's' : ''}`;
+                }
+                
+                return timeSavedText;
+            }
+        });
     </script>
 </body>
 </html>
